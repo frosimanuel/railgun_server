@@ -73,7 +73,7 @@ async function initRailgunEngine() {
 // Call it before starting the server
 initRailgunEngine().then(() => {
   const PORT = process.env.PORT || 10000;
-  app.listen(PORT, () => {
+  app.listen(PORT,'0.0.0.0', () => {
     console.log(`Backend API listening on port ${PORT}`);
   });
 });
