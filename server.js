@@ -47,6 +47,8 @@ function ensureDirectories() {
     }
 }
 
+let isRailgunReady = false;
+
 // Initialize Railgun Engine ONCE at server startup
 async function initRailgunEngine() {
   ensureDirectories();
@@ -70,16 +72,33 @@ async function initRailgunEngine() {
   console.log('RAILGUN Engine initialized!');
 }
 
-// Call it before starting the server
-initRailgunEngine().then(() => {
-  const PORT = process.env.PORT || 10000;
-  app.listen(PORT,'0.0.0.0', () => {
-    console.log(`Backend API listening on port ${PORT}`);
-  });
+// Start the server immediately
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Backend API is live and listening on port ${PORT}`);
+  // Now, start the heavy initialization in the background
+  console.log("Starting Railgun engine initialization...");
+  initRailgunEngine()
+    .then(() => {
+      isRailgunReady = true;
+      console.log("✅ Railgun Engine is fully initialized and ready.");
+    })
+    .catch(err => {
+      console.error("🔴 Railgun Engine failed to initialize:", err);
+    });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', railgunReady: isRailgunReady });
 });
 
 // POST /wallet/create
 app.post('/wallet/create', async (req, res) => {
+  if (!isRailgunReady) {
+    // 503 means "Service Unavailable" - the correct code for this state
+    return res.status(503).json({ error: 'Server is initializing, please try again in a moment.' });
+  }
   try {
     const mnemonic = ethers.Wallet.createRandom().mnemonic?.phrase;
     if (!mnemonic) {
