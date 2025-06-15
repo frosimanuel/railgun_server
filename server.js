@@ -8,10 +8,11 @@ const { groth16 } = require('snarkjs');
 const LevelDOWN = require('leveldown');
 const os = require('os');
 const crypto = require('crypto');
+const fs = require('fs');
 
 // Set up paths as in replicate.ts
-const DB_PATH = path.join(os.homedir(), '.railgun', 'railgun.db');
-const ARTIFACT_PATH = path.join(os.homedir(), '.railgun', 'artifacts');
+const DB_PATH = path.join(__dirname, '.railgun', 'railgun.db');
+const ARTIFACT_PATH = path.join(__dirname, '.railgun', 'artifacts');
 
 // Password hashing logic from replicate.ts
 function getIV() {
@@ -34,8 +35,22 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
+function ensureDirectories() {
+    const dbDir = path.dirname(DB_PATH);
+    if (!fs.existsSync(dbDir)) {
+        console.log(`Creating database directory: ${dbDir}`);
+        fs.mkdirSync(dbDir, { recursive: true });
+    }
+    if (!fs.existsSync(ARTIFACT_PATH)) {
+        console.log(`Creating artifacts directory: ${ARTIFACT_PATH}`);
+        fs.mkdirSync(ARTIFACT_PATH, { recursive: true });
+    }
+}
+
 // Initialize Railgun Engine ONCE at server startup
 async function initRailgunEngine() {
+  ensureDirectories();
+
   console.log('Initializing RAILGUN engine...');
   const engineDatabase = new LevelDOWN(DB_PATH);
 
