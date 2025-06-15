@@ -1,0 +1,3 @@
+import { RailgunPopulateTransactionResponse, RailgunTransactionGasEstimateResponse, RailgunERC20Amount, NetworkName, TransactionGasDetails, TXIDVersion } from '@railgun-community/shared-models';
+export declare const populateShieldBaseToken: (txidVersion: TXIDVersion, networkName: NetworkName, railgunAddress: string, shieldPrivateKey: string, wrappedERC20Amount: RailgunERC20Amount, gasDetails?: TransactionGasDetails) => Promise<RailgunPopulateTransactionResponse>;
+export declare const gasEstimateForShieldBaseToken: (txidVersion: TXIDVersion, networkName: NetworkName, railgunAddress: string, shieldPrivateKey: string, wrappedERC20Amount: RailgunERC20Amount, fromWalletAddress: string) => Promise<RailgunTransactionGasEstimateResponse>;
